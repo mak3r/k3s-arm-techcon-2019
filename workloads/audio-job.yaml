@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: audio-job
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      containers:
+      - name: audio-job
+        image: mak3r/rpi-audio-out:latest
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /
+            name: dev-snd
+      restartPolicy: Never
+      volumes:
+      - name: dev-snd
+        hostPath:
+          path: /

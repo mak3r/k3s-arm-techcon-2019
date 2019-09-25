@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audio-pod
+spec:
+  selector:
+    matchLabels:
+      app: audio-pod
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: audio-pod
+    spec:
+      containers:
+      - name: audio-pod
+        image: mak3r/rpi-audio-out:latest
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /
+            name: dev-snd
+      restartPolicy: Always
+      volumes:
+      - name: dev-snd
+        hostPath:
+          path: /

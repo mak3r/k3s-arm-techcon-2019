@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: power-pod
+spec:
+  selector:
+    matchLabels:
+      app: power-pod
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: power-pod
+    spec:
+      containers:
+      - name: power-pod
+        image: mak3r/pd-inaction:latest
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /dev/gpiomem
+            name: power-out
+      restartPolicy: Always
+      volumes:
+      - name: power-out
+        hostPath:
+          path: /dev/gpiomem
