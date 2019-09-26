@@ -124,11 +124,12 @@ over_voltage_min=0
 
 ## Transfer process
 ### On the original master
-1. `kubectl drain <next_master>`
+1. deploy the scout `kubectl apply -f scout.yaml`
 1. `kubectl drain <master_node>`
 1. `sudo tar -cvf k3s-archive.tar -C /var/lib/rancher/k3s server/cred server/tls server/db`
 1. `scp k3s-archive.tar pi@yellow-calf:~/.`
-1. halt k3s master `sudo halt`
+1. Tell new master to initialize `kubectl exec power_up_pod power_up.sh`
+1. halt k3s original master `sudo halt`
 ### On the new master
 1. `sudo systemctl disable k3s-agent`
 1. `sudo systemctl enable k3s`

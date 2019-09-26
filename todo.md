@@ -9,6 +9,7 @@
 * use power-pod.yaml which used the mak3r/pd-inaction container
 * do something useful when detected.
 
+## Create power_up_master and power_down_master scripts which will need to be available on all nodes (or use kubectl cp?)
 
 ## ++ Create a service for the receivers
 ```

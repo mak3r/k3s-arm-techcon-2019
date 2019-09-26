@@ -1,0 +1,50 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: default-rbac
+subjects:
+  - kind: ServiceAccount
+    # Reference to upper's `metadata.name`
+    name: default
+    # Reference to upper's `metadata.namespace`
+    namespace: k3s-arm-demo
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubectl-pod
+  namespace: k3s-arm-demo
+spec:
+  selector:
+    matchLabels:
+      app: kubectl-pod
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kubectl-pod
+    spec:
+      containers:
+      - name: kubectl-pod
+        image: raspbian/stretch
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /var/lib/rancher/k3s
+            name: local-k3s
+          - mountPath: /usr/local/bin
+            name: local-bin
+      restartPolicy: Always
+      volumes:
+      - name: local-k3s
+        hostPath:
+          path: /var/lib/rancher/k3s
+      - name: local-bin
+        hostPath:
+          path: /usr/local/bin
