@@ -40,6 +40,31 @@ tls_disable_tlsv1_1=1
 openssl_ciphers=DEFAULT@SECLEVEL=2
 ```
 
+## Set the hostname for each device
+Add a file to the boot directory before startup `/boot/hostname`. This file should include the device hostname to use.
+
+## Install a service to easily update the static ip address of each node at boot
+This service file allows us to drop place a configuration at `/boot/dhcpcd.conf` which will get copied into `/etc/dhcpcd.conf` before the next reboot.
+
+`sudo systemctl enable dhcpcd-init`
+`/etc/systemd/system/dhcpcd-init.service`:
+```
+[Unit]
+Description=Update the dhcpcd.conf when the system starts up
+ConditionPathExists=/boot/dhcpcd.conf
+Before=dhcpcd.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/mv /boot/dhcpcd.conf /etc/dhcpcd.conf
+ExecStartPost=/bin/chmod 664 /etc/dhcpcd.conf
+ExecStartPost=/bin/chown root:netdev /etc/dhcpcd.conf
+
+[Install]
+WantedBy=multi-user.target
+```
+
 ## Reduce power consumption on the Pi
 Thanks to https://learn.pi-supply.com/make/how-to-save-power-on-your-raspberry-pi/. View this site for info on how to turn these things back on.
 ### Turn off the USB bus 
@@ -110,30 +135,32 @@ over_voltage_min=0
 1. install k3s v0.3.0 `curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v0.3.0" INSTALL_K3S_EXEC=" --write-kubeconfig-mode=644 --node-ip=192.168.86.36" sh -`
 1. disable k3s `sudo systemctl disable k3s`
 
-## Master (k3s-calf)
+## Master (k3s-master)
 1. install systemd script to reduce power consumption `sudo systemctl enable reduce-power-consumption`
 1. install k3s v0.3.0 `curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v0.3.0" INSTALL_K3S_EXEC=" --write-kubeconfig-mode=644 --node-ip=192.168.86.36" sh -`
 1. install k3s v0.3.0 `curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v0.3.0" INSTALL_K3S_EXEC=" --write-kubeconfig-mode=644 --node-name=k3s-calf" sh -`
 1. install k3s v0.9.0 `curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v0.9.0" INSTALL_K3S_EXEC=" --write-kubeconfig-mode=644 --node-ip=192.168.86.36" sh -`
 1. get the node token `sudo cat /var/lib/rancher/k3s/server/node-token`
+1. label the node with `kubectl label node k3s-master nodetype=master`
 
-## Worker ()
+## Workers (k3s-workerNNN)
 1. install systemd script to reduce power consumption `sudo systemctl enable reduce-power-consumption`
 1. install k3s v0.3.0 as agent
 1. `curl -sfL https://get.k3s.io | K3S_URL="https://192.168.86.36:6443" INSTALL_K3S_VERSION="v0.3.0" K3S_TOKEN="K10647bc6fe82a602bd55a359d585ee7afdd27d2fc4de897093cd83bcaa2303013e::node:169b76e035617a11cb5de37f0bc6d09a" sh -`
 
 ## Transfer process
+* master needs affinity for `kubectl-pod` 
+* workers need anti-affinity or taints for `scout`
 ### On the original master
 1. deploy the scout `kubectl apply -f scout.yaml`
-1. `kubectl drain <master_node>`
+1. ~~`kubectl drain <master_node>`~~
 1. `sudo tar -cvf k3s-archive.tar -C /var/lib/rancher/k3s server/cred server/tls server/db`
-1. `scp k3s-archive.tar pi@yellow-calf:~/.`
+1. ~~`scp k3s-archive.tar pi@yellow-calf:~/.`~~
+1. `kubectl cp k3s-archive.tar scout`
 1. Tell new master to initialize `kubectl exec power_up_pod power_up.sh`
 1. halt k3s original master `sudo halt`
 ### On the new master
 1. `sudo systemctl disable k3s-agent`
-1. `sudo systemctl enable k3s`
-1. `stop k3s on new node`
 1. extract the archive `sudo tar -xvf k3s-archive.tar -C /var/lib/rancher/k3s/ --overwrite`
 1. rename host `sudo sed -i "s/$HOSTNAME/<newname>/g" /etc/hosts && sudo /bin/sh -c "echo <newname> > /etc/hostname"`
 1. change ip on node. Update /etc/dhcpcd.conf to use static ip address. 
@@ -143,6 +170,7 @@ over_voltage_min=0
     sudo /bin/bash -c 'echo "static routers=192.168.86.1" >> /etc/dhcpcd.conf'
     sudo /bin/bash -c 'echo "static domain_name_servers=192.168.86.1" >> /etc/dhcpcd.conf'
     ```
+1. `sudo systemctl enable k3s`
 1. reboot
 1. Q&A and slides
 1. Remove the old node `kubectl delete <node_name>`

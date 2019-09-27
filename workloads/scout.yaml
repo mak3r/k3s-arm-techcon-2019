@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scout
+  namespace: k3s-arm-demo
+spec:
+  selector:
+    matchLabels:
+      app: scout
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      containers:
+      - name: scout
+        image: raspbian/stretch
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /var/lib/rancher/k3s
+            name: local-k3s
+          - mountPath: /usr/local/bin
+            name: local-bin
+      nodeSelector:
+        nodetype: "master"
+      restartPolicy: Always
+      volumes:
+      - name: local-k3s
+        hostPath:
+          path: /var/lib/rancher/k3s
+      - name: local-bin
+        hostPath:
+          path: /usr/local/bin
