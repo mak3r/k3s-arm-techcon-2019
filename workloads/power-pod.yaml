@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: power-pod
+  namespace: k3s-arm-demo
 spec:
   selector:
     matchLabels:
@@ -14,14 +15,22 @@ spec:
     spec:
       containers:
       - name: power-pod
-        image: mak3r/pd-inaction:latest
+        image: mak3r/pd:latest
+        args: ["action.sh", "/usr/local/share/k3s/tc-enable", "6"]
         securityContext:
           privileged: true
         volumeMounts:
           - mountPath: /dev/gpiomem
             name: power-out
+          - mountPath: /usr/local/share/k3s
+            name: k3s-arm-demo-share
+      nodeSelector:
+        nodetype: "master"
       restartPolicy: Always
       volumes:
       - name: power-out
         hostPath:
           path: /dev/gpiomem
+      - name: k3s-arm-demo-share
+        hostPath:
+          path: /usr/local/share/k3s

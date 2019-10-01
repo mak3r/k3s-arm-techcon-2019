@@ -19,17 +19,12 @@ spec:
         securityContext:
           privileged: true
         volumeMounts:
-          - mountPath: /var/lib/rancher/k3s
-            name: local-k3s
-          - mountPath: /usr/local/bin
-            name: local-bin
+          - mountPath: /usr/local/share/k3s
+            name: k3s-arm-demo-share
       nodeSelector:
-        nodetype: "master"
+        nodetype: "worker"
       restartPolicy: Always
       volumes:
-      - name: local-k3s
+      - name: k3s-arm-demo-share
         hostPath:
-          path: /var/lib/rancher/k3s
-      - name: local-bin
-        hostPath:
-          path: /usr/local/bin
+          path: /usr/local/share/k3s

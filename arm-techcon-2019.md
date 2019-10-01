@@ -1,5 +1,5 @@
 # Build notes
-* Using rancher v0.5.0 as it is the latest version that can operate on very low amperage during startup of k3s. Later versions of k3s cause the board to go into a reboot cycle when the UPS is used. This is due to the low output amperage (~1000mA) of the PowerBoost 1000C. This is a known problem with the demo which will require a more robust UPS with similar functionality.
+* Using rancher v0.3.0 as it is the latest version that can operate on very low amperage during startup of k3s. Later versions of k3s cause the board to go into a reboot cycle when the UPS is used. This is due to the low output amperage (~1000mA) of the PowerBoost 1000C. This is a known problem with the demo which will require a more robust UPS with similar functionality.
 
 # Uninteruptable Power Supply (UPS) notes
 The UPS is build from an Adafruit PowerBoost 1000C which has several useful functions.
@@ -136,28 +136,47 @@ over_voltage_min=0
 1. disable k3s `sudo systemctl disable k3s`
 
 ## Master (k3s-master)
+1. Configure with hostname `k3s-master` and static ip `192.168.8.11`
 1. install systemd script to reduce power consumption `sudo systemctl enable reduce-power-consumption`
-1. install k3s v0.3.0 `curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v0.3.0" INSTALL_K3S_EXEC=" --write-kubeconfig-mode=644 --node-ip=192.168.86.36" sh -`
-1. install k3s v0.3.0 `curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v0.3.0" INSTALL_K3S_EXEC=" --write-kubeconfig-mode=644 --node-name=k3s-calf" sh -`
-1. install k3s v0.9.0 `curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v0.9.0" INSTALL_K3S_EXEC=" --write-kubeconfig-mode=644 --node-ip=192.168.86.36" sh -`
+1. install k3s v0.3.0 `curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v0.3.0" INSTALL_K3S_EXEC=" --write-kubeconfig-mode=644 --node-ip=192.168.8.11" sh -`
 1. get the node token `sudo cat /var/lib/rancher/k3s/server/node-token`
-1. label the node with `kubectl label node k3s-master nodetype=master`
 
 ## Workers (k3s-workerNNN)
+1. Configure with hostname `k3s-workerNNN` and static ip `192.168.8.NNN` where NN is a value 12-99 and unique to the cluster.
 1. install systemd script to reduce power consumption `sudo systemctl enable reduce-power-consumption`
 1. install k3s v0.3.0 as agent
-1. `curl -sfL https://get.k3s.io | K3S_URL="https://192.168.86.36:6443" INSTALL_K3S_VERSION="v0.3.0" K3S_TOKEN="K10647bc6fe82a602bd55a359d585ee7afdd27d2fc4de897093cd83bcaa2303013e::node:169b76e035617a11cb5de37f0bc6d09a" sh -`
+1. `curl -sfL https://get.k3s.io | K3S_URL="https://192.168.8.11:6443" INSTALL_K3S_VERSION="v0.3.0" K3S_TOKEN="K10b7ac26564cf397a1798bf20f5156cf0e3672fd8ee88a5ef346ec220f85f4538d::node:bb9c728531b5c6c5a83078925dd95fdf" sh -`
+
+## k3s cluster configuration
+* This should eventually be automated as failure to do this will cause the demo to fail!
+* All nodes should be able to run as all roles so once the setup is configured, an image should be created and replicated to all nodes in the cluster.
+1. label the master node with `kubectl label node k3s-master nodetype=master`
+1. label the worker nodes with `kubectl label node k3s-workerNN nodetype=worker`
+```
+#!/bin/bash
+
+# move the k3s-arm-demo-ns.yaml into the k3s manifests
+cp workloads/k3s-arm-demo-ns.yaml /var/lib/rancher/k3s/server/manifests/k3s-arm-demo-ns.yaml
+# move the power-pod.yaml into the k3s manifests 
+cp workloads/power-pod.yaml /var/lib/rancher/k3s/server/manifests/power-pod.yaml
+# move the scout.yaml to k3s share 
+cp workloads/scout.yaml /usr/local/share/k3s/scout.yaml
+# move the control scripts to /usr/bin
+cp scripts/become-master.sh /usr/bin/become-master.sh
+cp scripts/transfer-control.sh /usr/bin/transfer-control.sh
+```
+
 
 ## Transfer process
 * master needs affinity for `kubectl-pod` 
-* workers need anti-affinity or taints for `scout`
+* workers need anti-affinity or taints for `scout` and for LED workloads
 ### On the original master
 1. deploy the scout `kubectl apply -f scout.yaml`
 1. ~~`kubectl drain <master_node>`~~
-1. `sudo tar -cvf k3s-archive.tar -C /var/lib/rancher/k3s server/cred server/tls server/db`
+1. `sudo tar -cvf k3s-archive.tar -C /var/lib/rancher/k3s server/cred server/tls server/db server/manifests`
 1. ~~`scp k3s-archive.tar pi@yellow-calf:~/.`~~
 1. `kubectl cp k3s-archive.tar scout`
-1. Tell new master to initialize `kubectl exec power_up_pod power_up.sh`
+1. Tell new master to initialize `kubectl exec power_up_job power_up.sh`
 1. halt k3s original master `sudo halt`
 ### On the new master
 1. `sudo systemctl disable k3s-agent`
@@ -187,3 +206,6 @@ over_voltage_min=0
 
 ## Any Node
 * `systemd-analyze blame`
+
+## Master
+* `kubectl exec -it -n k3s-arm-demo power-pod-9f48c7b89-ghzgw /bin/bash`
