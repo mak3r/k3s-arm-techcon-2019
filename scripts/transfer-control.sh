@@ -28,9 +28,10 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     # send out the scout for a new master
     kubectl apply -f /usr/local/share/k3s/scout.yaml --kubeconfig="$KUBECONFIG"
     # wait until scout is fully deployed
-    STATUS=$(kubectl get pods -n k3s-arm-demo --selector=app=scout -o jsonpath='{.items[0].status.containerStatuses[0].ready}' --kubeconfig="$KUBECONFIG")
-    while [ "true" <> "$STATUS" ]; do
+    STATUS="false"
+    while [ "true" != "$STATUS" ]; do
         sleep 5
+        STATUS=$(kubectl get pods -n k3s-arm-demo --selector=app=scout -o jsonpath='{.items[0].status.containerStatuses[0].ready}' --kubeconfig="$KUBECONFIG")
     done
 
     # drain master 
@@ -63,6 +64,8 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     echo Script duration: $((end-start))
 
     # remove the activated file before halt
+    rm /usr/local/share/k3s/tc-enable-activated
+    
     # and shutdown the original master
-    rm /usr/local/share/k3s/tc-enable-activated && /sbin/halt
+    /sbin/halt
 fi
