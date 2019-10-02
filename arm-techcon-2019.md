@@ -145,7 +145,7 @@ over_voltage_min=0
 1. Configure with hostname `k3s-workerNNN` and static ip `192.168.8.NNN` where NN is a value 12-99 and unique to the cluster.
 1. install systemd script to reduce power consumption `sudo systemctl enable reduce-power-consumption`
 1. install k3s v0.3.0 as agent
-1. `curl -sfL https://get.k3s.io | K3S_URL="https://192.168.8.11:6443" INSTALL_K3S_VERSION="v0.3.0" K3S_TOKEN="K10b7ac26564cf397a1798bf20f5156cf0e3672fd8ee88a5ef346ec220f85f4538d::node:bb9c728531b5c6c5a83078925dd95fdf" sh -`
+1. `curl -sfL https://get.k3s.io | K3S_URL="https://192.168.8.11:6443" INSTALL_K3S_VERSION="v0.3.0" K3S_KUBECONFIG_OUTPUT="/usr/share/local/k3s/kubeconfig.yaml" K3S_TOKEN="K10b7ac26564cf397a1798bf20f5156cf0e3672fd8ee88a5ef346ec220f85f4538d::node:bb9c728531b5c6c5a83078925dd95fdf" sh -`
 
 ## k3s cluster configuration
 * This should eventually be automated as failure to do this will cause the demo to fail!

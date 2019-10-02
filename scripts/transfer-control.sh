@@ -29,7 +29,7 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     kubectl apply -f /usr/local/share/k3s/scout.yaml --kubeconfig="$KUBECONFIG"
     # wait until scout is fully deployed
     STATUS=$(kubectl get pods -n k3s-arm-demo --selector=app=scout -o jsonpath='{.items[0].status.containerStatuses[0].ready}' --kubeconfig="$KUBECONFIG")
-    while [ "true" -ne "$STATUS" ]; do
+    while [ "true" <> "$STATUS" ]; do
         sleep 5
     done
 
@@ -50,7 +50,7 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     kubectl drain $NODE_NAME --kubeconfig="$KUBECONFIG"
 
     # rename the host to the former k3s worker name
-    sed -i "s/$HOSTNAME/$NODE_NAME/g" /etc/hosts && sudo /bin/sh -c "echo $NODE_NAME > /etc/hostname"
+    sed -i "s/$HOSTNAME/$NODE_NAME/g" /etc/hosts && echo $NODE_NAME > /etc/hostname
 
     # make sure this system does not become the k3s-master when it restarts.
     systemctl disable k3s
@@ -65,4 +65,4 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     # remove the activated file before halt
     # and shutdown the original master
     rm /usr/local/share/k3s/tc-enable-activated && /sbin/halt
-fi;
+fi
