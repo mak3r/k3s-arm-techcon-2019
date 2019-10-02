@@ -2,7 +2,7 @@
 
 #check if the process is already activated
 if test -f "/usr/local/share/k3s/tc-enable-activated"; then
-    echo "master-enable in process" >> /usr/local/share/k3s/trasfer-control.out
+    echo "master-enable in process" >> /usr/local/share/k3s/transfer-control.out
     exit 0;
 fi
 
@@ -10,7 +10,7 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     # Log the script output
     exec 3>&1 4>&2
     trap 'exec 2>&4 1>&3' 0 1 2 3
-    exec 1>/usr/local/share/k3s/trasfer-control.out 2>&1
+    exec 1>/usr/local/share/k3s/transfer-control.out 2>&1
 
     #capture duration of this process
     start=`date +%s`
@@ -19,7 +19,7 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     touch /usr/local/share/k3s/tc-enable-activated
 
     # make sure we access the right cluster
-    KUBECONFIG=/var/lib/rancher/k3s/agent/kubeconfig.yaml
+    KUBECONFIG=/usr/local/share/k3s/kubeconfig.yaml
 
     #cleanup the enable file
     rm /usr/local/share/k3s/tc-enable
@@ -33,7 +33,7 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     # IF NOT, WE MAY NEED TO BAIL FROM THIS AND SEND AN ALERT VIA EMAIL INSTEAD
     #####################
 
-    # drain master because it is also a worker
+    # drain master 
     kubectl drain k3s-master --kubeconfig="$KUBECONFIG"
     # create an archive for the new master to use
     sudo tar -cvf k3s-archive.tar -C /var/lib/rancher/k3s server/cred server/tls server/db server/manifests agent/kubeconfig.yaml agent/client-ca.pem
@@ -49,7 +49,7 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     kubectl drain $NODE_NAME --kubeconfig="$KUBECONFIG"
 
     # rename the host to the former k3s worker name
-    sed -i "s/$HOSTNAME/$NODE_NAME/g" /host-etc/hosts && sudo /bin/sh -c "echo $NODE_NAME > /host-etc/hostname"
+    sed -i "s/$HOSTNAME/$NODE_NAME/g" /etc/hosts && sudo /bin/sh -c "echo $NODE_NAME > /etc/hostname"
 
     # make sure this system does not become the k3s-master when it restarts.
     systemctl disable k3s
@@ -57,13 +57,11 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     # drop in a generic dhcpcd configuration
     cp /usr/local/share/k3s/dhcpcd.auto.conf /boot/dhcpcd.conf
 
-    # remove the activated file before halt
-    rm /usr/local/share/k3s/m-enable-activated
-
     # finalize the duration
     end=`date +%s`
     echo Script duration: $((end-start))
 
-    # Once the archive is received, the scout should begin initializing the server as the master shutdown the original master
-    sudo halt
+    # remove the activated file before halt
+    # and shutdown the original master
+    rm /usr/local/share/k3s/tc-enable-activated && sudo halt
 fi;

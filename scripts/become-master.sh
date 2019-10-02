@@ -26,20 +26,18 @@ if test -f "/usr/local/share/k3s/master-enable"; then
     # extract the archive to rancher k3s location
     tar -xvf /usr/local/share/k3s/k3s-archive.tar -C /var/lib/rancher/k3s/ --overwrite
     # overwrite the hostname in prep for reboot
-    sed -i "s/$HOSTNAME/k3s-master/g" /host-etc/hosts && sudo /bin/sh -c "echo k3s-master > /host-etc/hostname"
+    sed -i "s/$HOSTNAME/k3s-master/g" /etc/hosts && sudo /bin/sh -c "echo k3s-master > /etc/hostname"
     # set the master static ip address in prep for reboot
     cp /usr/local/share/k3s/dhcpcd.static.conf /boot/dhcpcd.conf
     # enable k3s in prep for reboot
     systemctl enable k3s
 
-    # remove the activated file before reboot
-    rm /usr/local/share/k3s/m-enable-activated
-
     # finalize the duration
     end=`date +%s`
     echo Script duration: $((end-start))
 
-    # shutdown and bring the system back up
-    reboot
+    # remove the activated file 
+    # and shutdown and bring the system back up
+    rm /usr/local/share/k3s/m-enable-activated && reboot
 
 fi
