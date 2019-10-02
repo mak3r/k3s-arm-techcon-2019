@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #check if the process is already activated
-if test -f "/usr/local/share/k3s/tc-enable-activated"
-    echo "master-enable in process" >> /usr/local/share/k3s/become_master.out
+if test -f "/usr/local/share/k3s/tc-enable-activated"; then
+    echo "master-enable in process" >> /usr/local/share/k3s/trasfer-control.out
     exit 0;
 fi
 

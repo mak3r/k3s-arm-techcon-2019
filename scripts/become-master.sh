@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #check if the process is already activated
-if test -f "/usr/local/share/k3s/m-enable-activated"
+if test -f "/usr/local/share/k3s/m-enable-activated"; then
     echo "master-enable in process" >> /usr/local/share/k3s/become_master.out
     exit 0;
 fi
