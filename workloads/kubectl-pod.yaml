@@ -40,6 +40,8 @@ spec:
             name: local-k3s
           - mountPath: /usr/local/bin
             name: local-bin
+          - mountPath: /usr/local/share/k3s
+            name: k3s-arm-demo-share
       restartPolicy: Always
       volumes:
       - name: local-k3s
@@ -48,3 +50,6 @@ spec:
       - name: local-bin
         hostPath:
           path: /usr/local/bin
+      - name: k3s-arm-demo-share
+        hostPath:
+          path: /usr/local/share/k3s

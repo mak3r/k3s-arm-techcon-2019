@@ -36,7 +36,7 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     # drain master 
     kubectl drain k3s-master --kubeconfig="$KUBECONFIG"
     # create an archive for the new master to use
-    sudo tar -cvf k3s-archive.tar -C /var/lib/rancher/k3s server/cred server/tls server/db server/manifests agent/kubeconfig.yaml agent/client-ca.pem
+    tar -cvf k3s-archive.tar -C /var/lib/rancher/k3s server/cred server/tls server/db server/manifests agent/kubeconfig.yaml agent/client-ca.pem
     # get the pod that scout is running as
     SCOUT_POD=$(kubectl get pods -n k3s-arm-demo --selector=app=scout -o jsonpath='{.items[0].metadata.name}' --kubeconfig="$KUBECONFIG")
     #copy the archive to scout
@@ -44,7 +44,7 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     # once copied write the enable flag
     kubectl exec --kubeconfig="$KUBECONFIG" -n k3s-arm-demo $SCOUT_POD -- /usr/bin/touch /usr/local/share/k3s/master-enable
     # find the node name of the worker using scout
-    NODE_NAME=kubectl get pods -n k3s-arm-demo --selector=app=scout -o jsonpath='{.items[0].spec.nodeName}' --kubeconfig="$KUBECONFIG"
+    NODE_NAME=$(kubectl get pods -n k3s-arm-demo --selector=app=scout -o jsonpath='{.items[0].spec.nodeName}' --kubeconfig="$KUBECONFIG")
     # drain the worker that scout was on
     kubectl drain $NODE_NAME --kubeconfig="$KUBECONFIG"
 
@@ -63,5 +63,5 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
 
     # remove the activated file before halt
     # and shutdown the original master
-    rm /usr/local/share/k3s/tc-enable-activated && sudo halt
+    rm /usr/local/share/k3s/tc-enable-activated && halt
 fi;
