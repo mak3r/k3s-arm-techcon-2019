@@ -2,7 +2,7 @@
 
 #check if the process is already activated
 if test -f "/usr/local/share/k3s/tc-enable-activated"; then
-    echo "master-enable in process" >> /usr/local/share/k3s/transfer-control.out
+    printf "." >> /usr/local/share/k3s/transfer-control.out
     exit 0;
 fi
 
@@ -27,16 +27,17 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     cd /tmp
     # send out the scout for a new master
     kubectl apply -f /usr/local/share/k3s/scout.yaml --kubeconfig="$KUBECONFIG"
-    
-    ### ADD TEST HERE ###
-    # CHECK IF SCOUT FOUND A SUFFICIENT HOME 
-    # IF NOT, WE MAY NEED TO BAIL FROM THIS AND SEND AN ALERT VIA EMAIL INSTEAD
-    #####################
+    # wait until scout is fully deployed
+    STATUS=$(kubectl get pods -n k3s-arm-demo --selector=app=scout -o jsonpath='{.items[0].status.containerStatuses[0].ready}' --kubeconfig="$KUBECONFIG")
+    while [ "true" -ne "$STATUS" ]; do
+        sleep 5
+    done
 
     # drain master 
-    kubectl drain k3s-master --kubeconfig="$KUBECONFIG"
+    # kubectl drain k3s-master --kubeconfig="$KUBECONFIG"
     # create an archive for the new master to use
     tar -cvf k3s-archive.tar -C /var/lib/rancher/k3s server/cred server/tls server/db server/manifests agent/kubeconfig.yaml agent/client-ca.pem
+    
     # get the pod that scout is running as
     SCOUT_POD=$(kubectl get pods -n k3s-arm-demo --selector=app=scout -o jsonpath='{.items[0].metadata.name}' --kubeconfig="$KUBECONFIG")
     #copy the archive to scout
@@ -63,5 +64,5 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
 
     # remove the activated file before halt
     # and shutdown the original master
-    rm /usr/local/share/k3s/tc-enable-activated && halt
+    rm /usr/local/share/k3s/tc-enable-activated && /sbin/halt
 fi;

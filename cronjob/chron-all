@@ -1,7 +1,7 @@
 sudo crontab -e
 
 SHELL=/bin/bash
-PATH=/usr/local/bin/:/bin:/usr/bin
+PATH=/usr/local/bin/:/bin:/usr/bin:/sbin
 
 # Agent become master
 * * * * * for i in {1..12}; do /usr/bin/become-master.sh; sleep 5; done
