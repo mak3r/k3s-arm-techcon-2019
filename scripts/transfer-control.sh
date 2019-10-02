@@ -10,7 +10,7 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     # Log the script output
     exec 3>&1 4>&2
     trap 'exec 2>&4 1>&3' 0 1 2 3
-    exec 1>/usr/local/share/k3s/transfer-control.out 2>&1
+    exec 1>>/usr/local/share/k3s/transfer-control.out 2>&1
 
     #capture duration of this process
     start=`date +%s`

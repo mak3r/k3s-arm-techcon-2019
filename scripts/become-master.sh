@@ -26,7 +26,8 @@ if test -f "/usr/local/share/k3s/master-enable"; then
     # extract the archive to rancher k3s location
     tar -xvf /usr/local/share/k3s/k3s-archive.tar -C /var/lib/rancher/k3s/ --overwrite
     # overwrite the hostname in prep for reboot
-    sed -i "s/$HOSTNAME/k3s-master/g" /etc/hosts && echo k3s-master > /etc/hostname
+    sed -i "s/$HOSTNAME/k3s-master/g" /etc/hosts 
+    echo k3s-master > /etc/hostname
     # set the master static ip address in prep for reboot
     cp /usr/local/share/k3s/dhcpcd.static.conf /boot/dhcpcd.conf
     # enable k3s in prep for reboot

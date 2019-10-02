@@ -138,18 +138,23 @@ over_voltage_min=0
 ## Master (k3s-master)
 1. Configure with hostname `k3s-master` and static ip `192.168.8.11`
 1. install systemd script to reduce power consumption `sudo systemctl enable reduce-power-consumption`
-1. install k3s v0.3.0 `curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v0.3.0" INSTALL_K3S_EXEC=" --write-kubeconfig-mode=644 --node-ip=192.168.8.11" sh -`
+1. install k3s v0.3.0 `curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v0.3.0" INSTALL_K3S_EXEC=" --write-kubeconfig-mode=644 --node-ip=192.168.8.11 --tls-san=192.168.8.11 --write-kubeconfig=/usr/local/share/k3s/kubeconfig.yaml" sh -`
 1. get the node token `sudo cat /var/lib/rancher/k3s/server/node-token`
 
 ## Workers (k3s-workerNNN)
 1. Configure with hostname `k3s-workerNNN` and static ip `192.168.8.NNN` where NN is a value 12-99 and unique to the cluster.
 1. install systemd script to reduce power consumption `sudo systemctl enable reduce-power-consumption`
 1. install k3s v0.3.0 as agent
-1. `curl -sfL https://get.k3s.io | K3S_URL="https://192.168.8.11:6443" INSTALL_K3S_VERSION="v0.3.0" K3S_KUBECONFIG_OUTPUT="/usr/share/local/k3s/kubeconfig.yaml" K3S_TOKEN="K10b7ac26564cf397a1798bf20f5156cf0e3672fd8ee88a5ef346ec220f85f4538d::node:bb9c728531b5c6c5a83078925dd95fdf" sh -`
+1. `curl -sfL https://get.k3s.io | K3S_URL="https://192.168.8.11:6443" INSTALL_K3S_VERSION="v0.3.0" K3S_TOKEN="K10a1faf56f986864d357c5fec3acfc8394fb440805812457b1b1dab6d89640561a::node:0f9dbda75195ad0c100fb810a8700439" sh -`
 
 ## k3s cluster configuration
 * This should eventually be automated as failure to do this will cause the demo to fail!
 * All nodes should be able to run as all roles so once the setup is configured, an image should be created and replicated to all nodes in the cluster.
+1. link from the k3s.yaml to the installed location due to this issue (https://github.com/rancher/k3s/issues/378) which is fixed in 0.6.0 
+```
+sudo mkdir -p /etc/rancher/k3s
+sudo ln -s /var/lib/rancher/k3s/agent/kubeconfig.yaml /etc/rancher/k3s/k3s.yaml
+```
 1. label the master node with `kubectl label node k3s-master nodetype=master`
 1. label the worker nodes with `kubectl label node k3s-workerNN nodetype=worker`
 ```
