@@ -51,7 +51,8 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     kubectl drain $NODE_NAME --kubeconfig="$KUBECONFIG"
 
     # rename the host to the former k3s worker name
-    sed -i "s/$HOSTNAME/$NODE_NAME/g" /etc/hosts && echo $NODE_NAME > /etc/hostname
+    sed -i "s/$HOSTNAME/$NODE_NAME/g" /etc/hosts 
+    echo "$NODE_NAME" > /etc/hostname
 
     # make sure this system does not become the k3s-master when it restarts.
     systemctl disable k3s
