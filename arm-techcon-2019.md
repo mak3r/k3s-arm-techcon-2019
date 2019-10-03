@@ -139,13 +139,21 @@ over_voltage_min=0
 1. Configure with hostname `k3s-master` and static ip `192.168.8.11`
 1. install systemd script to reduce power consumption `sudo systemctl enable reduce-power-consumption`
 1. install k3s v0.3.0 `curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v0.3.0" INSTALL_K3S_EXEC=" --write-kubeconfig-mode=644 --node-ip=192.168.8.11 --tls-san=192.168.8.11 --write-kubeconfig=/usr/local/share/k3s/kubeconfig.yaml" sh -`
-1. get the node token `sudo cat /var/lib/rancher/k3s/server/node-token`
+1. disable the master `sudo systemctl disable k3s`
+1. install the agent script `curl -sfL https://get.k3s.io | K3S_URL="https://192.168.8.11:6443" INSTALL_K3S_VERSION="v0.3.0" K3S_TOKEN_FILE="/var/lib/rancher/k3s/server/node-token" sh -`
+1. disable the agent `sudo systemctl disable k3s-agent`
+1. start the master `sudo systemctl enable k3s`
+
 
 ## Workers (k3s-workerNNN)
+1. duplicate master image
+    * disable k3s
+    * disable k3s-agent
+    * clean extraneous files from `/usr/local/share/k3s`
 1. Configure with hostname `k3s-workerNNN` and static ip `192.168.8.NNN` where NN is a value 12-99 and unique to the cluster.
-1. install systemd script to reduce power consumption `sudo systemctl enable reduce-power-consumption`
-1. install k3s v0.3.0 as agent
-1. `curl -sfL https://get.k3s.io | K3S_URL="https://192.168.8.11:6443" INSTALL_K3S_VERSION="v0.3.0" K3S_TOKEN="K10a1faf56f986864d357c5fec3acfc8394fb440805812457b1b1dab6d89640561a::node:0f9dbda75195ad0c100fb810a8700439" sh -`
+1. reset to use auto configuration of dhcpcd
+1. `sudo systemctl disable k3s`
+1. enable the agent `sudo systemctl enable k3s-agent`
 
 ## k3s cluster configuration
 * This should eventually be automated as failure to do this will cause the demo to fail!

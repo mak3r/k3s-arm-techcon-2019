@@ -21,6 +21,9 @@ if test -f "/usr/local/share/k3s/master-enable"; then
     # clean up
     rm /usr/local/share/k3s/master-enable
 
+    # This process happens so fast, give the master some time to evict pods, etc.
+    sleep 60
+
     # disable the k3s-agent
     systemctl disable k3s-agent
     # extract the archive to rancher k3s location
@@ -39,6 +42,7 @@ if test -f "/usr/local/share/k3s/master-enable"; then
 
     # remove the activated file 
     # and shutdown and bring the system back up
-    rm /usr/local/share/k3s/m-enable-activated && reboot
+    rm /usr/local/share/k3s/m-enable-activated 
+    /sbin/reboot
 
 fi

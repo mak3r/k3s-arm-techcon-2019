@@ -43,22 +43,24 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     SCOUT_POD=$(kubectl get pods -n k3s-arm-demo --selector=app=scout -o jsonpath='{.items[0].metadata.name}' --kubeconfig="$KUBECONFIG")
     #copy the archive to scout
     kubectl cp k3s-archive.tar k3s-arm-demo/$SCOUT_POD:/usr/local/share/k3s/k3s-archive.tar --kubeconfig="$KUBECONFIG"
-    # once copied write the enable flag
-    kubectl exec --kubeconfig="$KUBECONFIG" -n k3s-arm-demo $SCOUT_POD -- /usr/bin/touch /usr/local/share/k3s/master-enable
     # find the node name of the worker using scout
     NODE_NAME=$(kubectl get pods -n k3s-arm-demo --selector=app=scout -o jsonpath='{.items[0].spec.nodeName}' --kubeconfig="$KUBECONFIG")
-    # drain the worker that scout was on
-    kubectl drain $NODE_NAME --kubeconfig="$KUBECONFIG"
 
     # rename the host to the former k3s worker name
     sed -i "s/$HOSTNAME/$NODE_NAME/g" /etc/hosts 
     echo "$NODE_NAME" > /etc/hostname
 
-    # make sure this system does not become the k3s-master when it restarts.
-    systemctl disable k3s
-
     # drop in a generic dhcpcd configuration
     cp /usr/local/share/k3s/dhcpcd.auto.conf /boot/dhcpcd.conf
+
+    # everything is set here write the enable flag
+    kubectl exec --kubeconfig="$KUBECONFIG" -n k3s-arm-demo $SCOUT_POD -- /usr/bin/touch /usr/local/share/k3s/master-enable
+
+    # drain the worker that scout was on
+    kubectl drain $NODE_NAME --kubeconfig="$KUBECONFIG"
+
+    # make sure this system does not become the k3s-master when it restarts.
+    systemctl disable k3s
 
     # finalize the duration
     end=`date +%s`
@@ -68,5 +70,5 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     rm /usr/local/share/k3s/tc-enable-activated
     
     # and shutdown the original master
-    /sbin/halt
+    /sbin/poweroff
 fi
