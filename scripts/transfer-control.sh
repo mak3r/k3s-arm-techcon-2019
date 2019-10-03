@@ -47,7 +47,7 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     NODE_NAME=$(kubectl get pods -n k3s-arm-demo --selector=app=scout -o jsonpath='{.items[0].spec.nodeName}' --kubeconfig="$KUBECONFIG")
 
     # rename the host to the former k3s worker name
-    sed -i "s/$HOSTNAME/$NODE_NAME/g" /etc/hosts 
+    sed -i 's/'"$HOSTNAME"'/'"$NODE_NAME"'/g' /etc/hosts 
     echo "$NODE_NAME" > /etc/hostname
 
     # drop in a generic dhcpcd configuration
@@ -56,8 +56,13 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     # everything is set here write the enable flag
     kubectl exec --kubeconfig="$KUBECONFIG" -n k3s-arm-demo $SCOUT_POD -- /usr/bin/touch /usr/local/share/k3s/master-enable
 
+    # remove the scout
+    kubectl delete deployment scout -n k3s-arm-demo
+    sleep 10
+
     # drain the worker that scout was on
     kubectl drain $NODE_NAME --kubeconfig="$KUBECONFIG"
+    sleep 10
 
     # make sure this system does not become the k3s-master when it restarts.
     systemctl disable k3s
@@ -68,7 +73,11 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
 
     # remove the activated file before halt
     rm /usr/local/share/k3s/tc-enable-activated
-    
+
+    # setup so this will come back up as an agent when we restart it.
+    systemctl enable k3s-agent
+    sleep 5
+
     # and shutdown the original master
     /sbin/poweroff
 fi

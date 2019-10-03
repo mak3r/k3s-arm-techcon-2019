@@ -14,3 +14,6 @@ cp scripts/transfer-control.sh /usr/bin/transfer-control.sh
 cp config/dhcpcd.static.conf /usr/local/share/k3s/.
 cp config/dhcpcd.auto.conf /usr/local/share/k3s/.
 
+kubectl label node k3s-master nodetype=master
+kubectl label node k3s-worker001 nodetype=worker
+kubectl label node k3s-worker002 nodetype=worker

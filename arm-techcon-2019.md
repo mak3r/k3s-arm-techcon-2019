@@ -138,9 +138,9 @@ over_voltage_min=0
 ## Master (k3s-master)
 1. Configure with hostname `k3s-master` and static ip `192.168.8.11`
 1. install systemd script to reduce power consumption `sudo systemctl enable reduce-power-consumption`
-1. install k3s v0.3.0 `curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v0.3.0" INSTALL_K3S_EXEC=" --write-kubeconfig-mode=644 --node-ip=192.168.8.11 --tls-san=192.168.8.11 --write-kubeconfig=/usr/local/share/k3s/kubeconfig.yaml" sh -`
+1. install k3s v0.3.0 `curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v0.6.0" INSTALL_K3S_EXEC=" --write-kubeconfig-mode=644 --node-ip=192.168.8.11 --tls-san=192.168.8.11 --write-kubeconfig=/usr/local/share/k3s/kubeconfig.yaml --cluster-secret=k3s-arm-demo" sh -`
 1. disable the master `sudo systemctl disable k3s`
-1. install the agent script `curl -sfL https://get.k3s.io | K3S_URL="https://192.168.8.11:6443" INSTALL_K3S_VERSION="v0.3.0" K3S_TOKEN_FILE="/var/lib/rancher/k3s/server/node-token" sh -`
+1. install the agent script `curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v0.6.0" INSTALL_K3S_EXEC="agent --server=https://192.168.8.11:6443 --cluster-secret=k3s-arm-demo" sh -`
 1. disable the agent `sudo systemctl disable k3s-agent`
 1. start the master `sudo systemctl enable k3s`
 

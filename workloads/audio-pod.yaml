@@ -18,10 +18,12 @@ spec:
         securityContext:
           privileged: true
         volumeMounts:
-          - mountPath: /
+          - mountPath: /dev/snd
             name: dev-snd
+      nodeSelector:
+        kubernetes.io/hostname: k3s-worker002            
       restartPolicy: Always
       volumes:
       - name: dev-snd
         hostPath:
-          path: /
+          path: /dev/snd
