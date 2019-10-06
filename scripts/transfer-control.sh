@@ -41,6 +41,9 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     # create an archive for the new master to use
     tar -cvf k3s-archive.tar -C /var/lib/rancher/k3s server/cred server/tls server/db server/manifests agent/kubeconfig.yaml agent/client-ca.pem
     
+    # cordon the master so that when we drain worker, it doesn't end up on master
+    kubectl cordon k3s-master --kubeconfig="$KUBECONFIG"
+    
     # get the pod that scout is running as
     SCOUT_POD=$(kubectl get pods -n k3s-arm-demo --selector=app=scout -o jsonpath='{.items[0].metadata.name}' --kubeconfig="$KUBECONFIG")
     #copy the archive to scout
@@ -59,14 +62,8 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     kubectl exec --kubeconfig="$KUBECONFIG" -n k3s-arm-demo $SCOUT_POD -- /usr/bin/touch /usr/local/share/k3s/master-enable
 
     # remove the scout
-    kubectl delete deployment scout -n k3s-arm-demo --kubeconfig="$KUBECONFIG"
-
-    # wait until scout is fully undeployed
-    STATUS="true"
-    while [ "true" == "$STATUS" ]; do
-        sleep 5
-        STATUS=$(kubectl get pods -n k3s-arm-demo --selector=app=scout -o jsonpath='{.items[0].status.containerStatuses[0].ready}' --kubeconfig="$KUBECONFIG")
-    done
+    kubectl delete deployment scout -n k3s-arm-demo --kubeconfig="$KUBECONFIG" --force --grace-period=0
+    sleep 20
 
     # drain the worker that scout was on
     # THIS REQUIRES MORE TIME THAN WE HAVE IN THE DEMO

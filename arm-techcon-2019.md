@@ -230,8 +230,8 @@ cp scripts/transfer-control.sh /usr/bin/transfer-control.sh
 - long press: (bonus) undeploy audio job moo
 
 ## Button E
-- release: deploy job to set pin 4 and pin 5 low (clear all leds)
-- long press: undeploy job to set pin 4 and pin 5 low
+- release: delete the scout
+- long press: delete the scout
 
 --------- 
 # Debug things
@@ -243,3 +243,5 @@ cp scripts/transfer-control.sh /usr/bin/transfer-control.sh
 
 ## Master
 * `kubectl exec -it -n k3s-arm-demo power-pod-9f48c7b89-ghzgw /bin/bash`
+
+
