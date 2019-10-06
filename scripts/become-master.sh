@@ -22,7 +22,7 @@ if test -f "/usr/local/share/k3s/master-enable"; then
     rm /usr/local/share/k3s/master-enable
 
     # This process happens so fast, give the master some time to evict pods, etc.
-    sleep 120
+    sleep 180
 
     # disable the k3s-agent
     systemctl disable k3s-agent

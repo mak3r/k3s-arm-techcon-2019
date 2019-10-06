@@ -60,11 +60,19 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
 
     # remove the scout
     kubectl delete deployment scout -n k3s-arm-demo --kubeconfig="$KUBECONFIG"
-    sleep 20
+
+    # wait until scout is fully undeployed
+    STATUS="true"
+    while [ "true" == "$STATUS" ]; do
+        sleep 5
+        STATUS=$(kubectl get pods -n k3s-arm-demo --selector=app=scout -o jsonpath='{.items[0].status.containerStatuses[0].ready}' --kubeconfig="$KUBECONFIG")
+    done
 
     # drain the worker that scout was on
+    # THIS REQUIRES MORE TIME THAN WE HAVE IN THE DEMO
+    # IN A PRODUCTION ENV, IT WOULD BE IMPORTANT AND WE SHOULD DO IT
     kubectl drain $NODE_NAME --ignore-daemonsets --kubeconfig="$KUBECONFIG"
-    sleep 60
+    sleep 90
 
     # make sure this system does not become the k3s-master when it restarts.
     systemctl disable k3s
