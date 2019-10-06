@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: find-worker002
+  namespace: k3s-arm-demo
+spec:
+  selector:
+    matchLabels:
+      app: find-worker002
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: find-worker002
+    spec:
+      containers:
+      - name: find-worker002
+        image: mak3r/rpi-led:latest
+        args: ["blink1.sh", "4"]
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /dev/gpiomem
+            name: gpio4
+      nodeSelector:
+        kubernetes.io/hostname: "k3s-worker002"
+      restartPolicy: Always
+      volumes:
+      - name: gpio4
+        hostPath:
+          path: /dev/gpiomem

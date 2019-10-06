@@ -8,16 +8,16 @@ spec:
     spec:
       containers:
       - name: audio-job
-        image: mak3r/rpi-audio-out:latest
+        image: mak3r/k3s-rpi-audio:latest
         securityContext:
           privileged: true
         volumeMounts:
-          - mountPath: /
+          - mountPath: /dev/snd
             name: dev-snd
       nodeSelector:
-        kubernetes.io/hostname: k3s-worker002
+        nodetype: "master"
       restartPolicy: Never
       volumes:
       - name: dev-snd
         hostPath:
-          path: /
+          path: /dev/snd

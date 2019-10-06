@@ -212,6 +212,27 @@ cp scripts/transfer-control.sh /usr/bin/transfer-control.sh
 1. ??? scale down one of the led jobs ??? `kubectl scale --replicas=2 -f blue.yaml`
 1. ??? scale up one of the led jobs ???
 
+# Demo controller funtions
+## Button A
+- release: deploy daemonset for lights on pin 4
+- long press: remove daemonset for lights on pin 4
+
+## Button B
+- release: deploy deployment with scale 1 for lights on pin 5
+- long press: remove deployment for lights on pin 5
+
+## Button C
+- release: scale deployment on pin 5 up by 1
+- long press: scale deployment on pin 5 down by 1
+
+## Button D
+- release: (bonus) deploy job to audio moo on current master node
+- long press: (bonus) undeploy audio job moo
+
+## Button E
+- release: deploy job to set pin 4 and pin 5 low (clear all leds)
+- long press: undeploy job to set pin 4 and pin 5 low
+
 --------- 
 # Debug things
 ## Agent

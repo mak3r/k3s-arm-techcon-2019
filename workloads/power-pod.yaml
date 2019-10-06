@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
       - name: power-pod
-        image: mak3r/pd:latest
-        args: ["action.sh", "/usr/local/share/k3s/tc-enable", "6"]
+        image: mak3r/pd:polling
+        args: ["action.sh", "/usr/local/share/k3s/tc-enable", "6", "15"]
         securityContext:
           privileged: true
         volumeMounts:

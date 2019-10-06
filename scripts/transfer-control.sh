@@ -15,6 +15,8 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     #capture duration of this process
     start=`date +%s`
     
+    # deploy audio job with chicken sound to master (bonus)
+
     # set a file so we don't try to repeat the process again and again if it's already running.
     touch /usr/local/share/k3s/tc-enable-activated
 
@@ -57,12 +59,12 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     kubectl exec --kubeconfig="$KUBECONFIG" -n k3s-arm-demo $SCOUT_POD -- /usr/bin/touch /usr/local/share/k3s/master-enable
 
     # remove the scout
-    kubectl delete deployment scout -n k3s-arm-demo
-    sleep 10
+    kubectl delete deployment scout -n k3s-arm-demo --kubeconfig="$KUBECONFIG"
+    sleep 20
 
     # drain the worker that scout was on
-    kubectl drain $NODE_NAME --kubeconfig="$KUBECONFIG"
-    sleep 10
+    kubectl drain $NODE_NAME --ignore-daemonsets --kubeconfig="$KUBECONFIG"
+    sleep 60
 
     # make sure this system does not become the k3s-master when it restarts.
     systemctl disable k3s
@@ -71,13 +73,15 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     end=`date +%s`
     echo Script duration: $((end-start))
 
+    # setup so this will come back up as an agent when we restart it.
+    # This is for demo purposes to have a rolling demo but in a real scenario,
+    #  we probably would not want this to join back in until the hardware is evaluated.
+    #  it depends.
+    systemctl enable k3s-agent
+    sleep 10
+
     # remove the activated file before halt
     rm /usr/local/share/k3s/tc-enable-activated
-
-    # setup so this will come back up as an agent when we restart it.
-    systemctl enable k3s-agent
-    sleep 5
-
     # and shutdown the original master
     /sbin/poweroff
 fi

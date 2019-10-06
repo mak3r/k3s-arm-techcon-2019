@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: audio-pod
-        image: mak3r/rpi-audio-out:latest
+        image: mak3r/k3s-rpi-audio:latest
         securityContext:
           privileged: true
         volumeMounts:
