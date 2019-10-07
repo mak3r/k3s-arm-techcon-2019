@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: reset
-        image: debian:buster:slim
+        image: debian:buster-slim
         securityContext:
           privileged: true
         volumeMounts:
