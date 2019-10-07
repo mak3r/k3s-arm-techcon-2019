@@ -82,11 +82,13 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     # This is for demo purposes to have a rolling demo but in a real scenario,
     #  we probably would not want this to join back in until the hardware is evaluated.
     #  it depends.
-    systemctl enable k3s-agent
-    sleep 10
+    exec systemctl enable k3s-agent
 
     # remove the activated file before halt
-    rm /usr/local/share/k3s/tc-enable-activated
+    # Leave this file in place until after reboot. There is a reset-tc.yaml designed to reset the demo and remove it.
+    # This provides assurance that we won't accidentally run this process more than once in a control trasfer cycle
+    #rm /usr/local/share/k3s/tc-enable-activated
+
     # and shutdown the original master
     /sbin/poweroff
 fi
