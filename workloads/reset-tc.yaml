@@ -15,13 +15,13 @@ spec:
     spec:
       containers:
       - name: reset
-        image: debian:buster-slim
+        image: raspbian/stretch
         securityContext:
           privileged: true
         volumeMounts:
           - mountPath: /usr/local/share/k3s
             name: k3s-arm-demo-share
-      command: ["/bin/rm", "/usr/local/share/k3s/tc-enable-activated"]
+      command: ["/bin/bash", "-c", "'/bin/rm /usr/local/share/k3s/tc-enable-activated; while true; do sleep 30; done"]
       restartPolicy: Always
       volumes:
       - name: k3s-arm-demo-share
