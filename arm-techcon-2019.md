@@ -24,7 +24,7 @@ The USB pin (5v in) is connected to a voltage divider achieving 3.2v out. This i
 * Raspberry Pi Model 3 A+ (adafruit and other vendors)
 * 8GB micro SD - Class 10 or better U3 is best right now (various vendors)
 * Raspbian stretch
-* k3s v??
+* k3s v0.6.0
 
 ---------- 
 # Device Prep
@@ -38,6 +38,12 @@ Add the following lines to wpa_supplicant.conf
 tls_disable_tlsv1_0=1
 tls_disable_tlsv1_1=1
 openssl_ciphers=DEFAULT@SECLEVEL=2
+```
+
+## Cleanup the thread lock file 
+During the master transfer-control.sh process we block the process from being started again by laying down a file. For some reason, I am unable to clean this file up directly from the transfer-control.sh script. So, we'll do it when the system restarts as an agent. On all nodes, add this to `[Service]` block of the file `/etcd/systemd/system/k3s-agent.service`:
+```
+ExecStartPre=/bin/rm /usr/local/share/k3s/tc-enable-activated
 ```
 
 ## Set the hostname for each device
@@ -230,8 +236,9 @@ cp scripts/transfer-control.sh /usr/bin/transfer-control.sh
 - long press: (bonus) undeploy audio job moo
 
 ## Button E
-- release: delete the scout
-- long press: delete the scout
+- release: deploy find-worker1 and find-worker2
+- long press: scale find-worker1 and find-worker2
+- double click (less than 1 sec) undeploy find-worker1 and find-worker2
 
 --------- 
 # Debug things
@@ -241,7 +248,7 @@ cp scripts/transfer-control.sh /usr/bin/transfer-control.sh
 ## Any Node
 * `systemd-analyze blame`
 
-## Master
-* `kubectl exec -it -n k3s-arm-demo power-pod-9f48c7b89-ghzgw /bin/bash`
+## Get into the power-pod
+* `kubectl exec -it -n k3s-arm-demo <power-pod-abc123-abc123> /bin/bash`
 
 
