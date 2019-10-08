@@ -69,7 +69,6 @@ if test -f "/usr/local/share/k3s/tc-enable"; then
     # THIS REQUIRES MORE TIME THAN WE HAVE IN THE DEMO
     # IN A PRODUCTION ENV, IT WOULD BE IMPORTANT AND WE SHOULD DO IT
     kubectl drain $NODE_NAME --ignore-daemonsets --kubeconfig="$KUBECONFIG"
-    sleep 90
 
     # make sure this system does not become the k3s-master when it restarts.
     systemctl disable k3s

@@ -16,14 +16,14 @@ spec:
       containers:
       - name: find-worker002
         image: mak3r/rpi-led:latest
-        args: ["blink1.sh", "4"]
+        args: ["blink2.sh", "5"]
         securityContext:
           privileged: true
         volumeMounts:
           - mountPath: /dev/gpiomem
             name: gpio4
       nodeSelector:
-        kubernetes.io/hostname: "k3s-worker002"
+        nodetype: "worker"
       restartPolicy: Always
       volumes:
       - name: gpio4
