@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: reset
+  namespace: k3s-arm-demo
+spec:
+  selector:
+    matchLabels:
+      app: reset
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: reset
+    spec:
+      containers:
+      - name: reset
+        image: raspbian/stretch
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /usr/local/share/k3s
+            name: k3s-arm-demo-share
+      command: ["/bin/bash"]
+      args: ["-c", "'/bin/rm /usr/local/share/k3s/tc-enable-activated; while true; do sleep 30; done'"]
+      restartPolicy: Always
+      volumes:
+      - name: k3s-arm-demo-share
+        hostPath:
+          path: /usr/local/share/k3s

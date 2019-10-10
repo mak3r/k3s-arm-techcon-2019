@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: white-pod
+  namespace: k3s-arm-demo
+spec:
+  selector:
+    matchLabels:
+      app: white-pod
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: white-pod
+    spec:
+      containers:
+      - name: white-pod
+        image: mak3r/rpi-led:latest
+        args: ["blink1.sh", "4"]
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /dev/gpiomem
+            name: gpio4
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/usr/bin/touch", "./terminate"]
+      restartPolicy: Always
+      volumes:
+      - name: gpio4
+        hostPath:
+          path: /dev/gpiomem

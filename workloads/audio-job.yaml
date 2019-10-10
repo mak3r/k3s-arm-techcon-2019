@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: audio-job
+  namespace: k3s-arm-demo
+spec: 
+  backoffLimit: 2
+  template:
+    spec:
+      containers:
+      - name: audio-job
+        image: mak3r/k3s-rpi-audio:latest
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /dev/snd
+            name: dev-snd
+      nodeSelector:
+        nodetype: "master"
+      restartPolicy: Never
+      volumes:
+      - name: dev-snd
+        hostPath:
+          path: /dev/snd

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audio-pod
+spec:
+  selector:
+    matchLabels:
+      app: audio-pod
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: audio-pod
+    spec:
+      containers:
+      - name: audio-pod
+        image: mak3r/k3s-rpi-audio:latest
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /dev/snd
+            name: dev-snd
+      nodeSelector:
+        kubernetes.io/hostname: k3s-worker002            
+      restartPolicy: Always
+      volumes:
+      - name: dev-snd
+        hostPath:
+          path: /dev/snd

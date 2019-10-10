@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: find-worker001
+  namespace: k3s-arm-demo
+spec:
+  selector:
+    matchLabels:
+      app: find-worker001
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: find-worker001
+    spec:
+      containers:
+      - name: find-worker001
+        image: mak3r/rpi-led:latest
+        args: ["blink2.sh", "4"]
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /dev/gpiomem
+            name: gpio4
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/usr/bin/touch", "./terminate"]
+      nodeSelector:
+        nodetype: "worker"
+      restartPolicy: Always
+      volumes:
+      - name: gpio4
+        hostPath:
+          path: /dev/gpiomem

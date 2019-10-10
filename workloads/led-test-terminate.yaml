@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: all-off
+  namespace: k3s-arm-demo
+spec:
+  selector:
+    matchLabels:
+      app: all-off
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: all-off
+      name: all-off
+    spec:
+      containers:
+      - name: all-off4
+        image: mak3r/rpi-led:testing3
+        args: ["blink2.sh", "4"]
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /dev/gpiomem
+            name: gpiomem
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/usr/bin/touch", "./terminate"]
+      - name: all-off5
+        image: mak3r/rpi-led:testing3
+        args: ["blink2.sh", "5"]
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /dev/gpiomem
+            name: gpiomem
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/usr/bin/touch", "./terminate"]
+      restartPolicy: Always
+      volumes:
+      - name: gpiomem
+        hostPath:
+          path: /dev/gpiomem

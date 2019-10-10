@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scout
+  namespace: k3s-arm-demo
+spec:
+  selector:
+    matchLabels:
+      app: scout
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: scout
+    spec:
+      containers:
+      - name: scout
+        image: raspbian/stretch
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /usr/local/share/k3s
+            name: k3s-arm-demo-share
+      nodeSelector:
+        nodetype: "worker"
+      restartPolicy: Always
+      volumes:
+      - name: k3s-arm-demo-share
+        hostPath:
+          path: /usr/local/share/k3s
