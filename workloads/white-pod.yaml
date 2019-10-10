@@ -22,6 +22,10 @@ spec:
         volumeMounts:
           - mountPath: /dev/gpiomem
             name: gpio4
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/usr/bin/touch", "./terminate"]
       restartPolicy: Always
       volumes:
       - name: gpio4

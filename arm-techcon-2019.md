@@ -32,12 +32,19 @@ The USB pin (5v in) is connected to a voltage divider achieving 3.2v out. This i
 CPU load issue with k3s > v0.6.0?
 https://github.com/rancher/k3s/issues/294
 
-## Secure TLS in wpasupplicant
+## Secure TLS in wpasupplicant (optional)
 Add the following lines to wpa_supplicant.conf
 ```
 tls_disable_tlsv1_0=1
 tls_disable_tlsv1_1=1
 openssl_ciphers=DEFAULT@SECLEVEL=2
+```
+
+## disable swap permanently
+```
+sudo dphys-swapfile swapoff
+sudo dphys-swapfile uninstall
+sudo systemctl disable dphys-swapfile
 ```
 
 ## Cleanup the thread lock file 
@@ -71,7 +78,7 @@ ExecStartPost=/bin/chown root:netdev /etc/dhcpcd.conf
 WantedBy=multi-user.target
 ```
 
-## Reduce power consumption on the Pi
+## Reduce power consumption on the Pi (optional)
 Thanks to https://learn.pi-supply.com/make/how-to-save-power-on-your-raspberry-pi/. View this site for info on how to turn these things back on.
 ### Turn off the USB bus 
 * `echo 'usb1' |sudo tee /sys/bus/usb/drivers/usb/unbind`
@@ -98,7 +105,7 @@ drwxr-xr-x 10 root root    0 Sep 22 03:00 ..
 --w-------  1 root root 4096 Sep 22 13:37 unbind
 ```
 
-### Turn off HDMI output
+### Turn off HDMI output (optional)
 * `sudo /opt/vc/bin/tvservice -o`
 * Validate with `tvservice -s`
 #### EXAMPLE OFF

@@ -1,34 +1,46 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: blue-ds
+  name: all-off
   namespace: k3s-arm-demo
 spec:
   selector:
     matchLabels:
-      app: blue-ds
+      app: all-off
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: blue-ds
-      name: blue-ds
+        app: all-off
+      name: all-off
     spec:
       containers:
-      - name: blue-ds
-        image: mak3r/rpi-led:latest
+      - name: all-off4
+        image: mak3r/rpi-led:testing3
+        args: ["blink2.sh", "4"]
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /dev/gpiomem
+            name: gpiomem
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/usr/bin/touch", "./terminate"]
+      - name: all-off5
+        image: mak3r/rpi-led:testing3
         args: ["blink2.sh", "5"]
         securityContext:
           privileged: true
         volumeMounts:
           - mountPath: /dev/gpiomem
-            name: gpio4
+            name: gpiomem
         lifecycle:
           preStop:
             exec:
               command: ["/usr/bin/touch", "./terminate"]
       restartPolicy: Always
       volumes:
-      - name: gpio4
+      - name: gpiomem
         hostPath:
           path: /dev/gpiomem
