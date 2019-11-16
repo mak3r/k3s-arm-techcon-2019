@@ -1,5 +1,5 @@
 # Build notes
-* Using rancher v0.3.0 as it is the latest version that can operate on very low amperage during startup of k3s. Later versions of k3s cause the board to go into a reboot cycle when the UPS is used. This is due to the low output amperage (~1000mA) of the PowerBoost 1000C. This is a known problem with the demo which will require a more robust UPS with similar functionality.
+* Using rancher v0.6.0 as it is the latest version that I had successfully tested against before running the demo live. v0.9.0 was causing issues operate on very low amperage during startup of k3s. This later version caused the board to go into a reboot cycle when the UPS was used. I expect it was due to the low output amperage (~1000mA) of the PowerBoost 1000C. This is a known limitation of the demo which will require a more robust UPS with similar functionality. 
 
 # Uninteruptable Power Supply (UPS) notes
 The UPS is build from an Adafruit PowerBoost 1000C which has several useful functions.
